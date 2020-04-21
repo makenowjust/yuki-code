@@ -224,6 +224,7 @@ const main = async () => {
   });
 
   // TODO: Use `calt` feature instead of `liga` for more correct substitution.
+  // e.g. `====` is displayed as three-equals plus one equal currently, but four idnependent equals are expected.
   console.log('Adding ligature information');
   for (const [from, name] of ligatureData.map) {
     font.substitution.add('liga', {

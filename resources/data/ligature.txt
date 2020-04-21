@@ -1,0 +1,35 @@
+# punctuations:
+->  hyphen_greater.liga
+=>  equal_greater.liga
+::  colon_colon.liga
+
+# comments:
+/*  slash_asterisk.liga
+*/  asterisk_slash.liga
+
+# comparison operators:
+=== equal_equal_equal.liga
+==  equal_equal.liga
+!== exclam_equal_equal.liga
+!=  exclam_equal.liga
+<=> less_equal_greater.liga
+>=  greater_equal.liga
+<=  less_equal.liga
+
+# logical operators:
+&&  ampersand_ampersand.liga
+||  bar_bar.liga
+??  question_question.liga
+
+# other operators:
+**  asterisk_asterisk.liga
+//  slash_slash.liga
+
+# range constructors:
+... period_period_period.liga
+..  period_period.liga
+
+# property indicators:
+?.  question_period.liga
+
+# vim:ft=sh:

@@ -202,9 +202,11 @@ const main = async () => {
       continue;
     }
 
-    // TODO: Calculate correctly. It is magical for now.
-    const offsetScale = from.length === 3 ? 4.75 : 2.25;
-    const path = adjustPath(glyph.path, ligatureRatio, (cjkWidth / 2) * ligatureRatio * offsetScale);
+    // A ligature glyph has negative offset because FiraCode ligature uses `calt` substitution.
+    // In FiraCode, `advanceWidth` is for only last character, other characters are replaced with dummy glyph.
+    // So adjusting negative offset and overiding `advanceWidth` are needed.
+    const offsetX = (cjkWidth / 2) * (from.length - 1);
+    const path = adjustPath(glyph.path, ligatureRatio, offsetX);
     ligatureToGlyphIndex.set(name, glyphs.length);
     glyphs.push(new opentype.Glyph({
       name,

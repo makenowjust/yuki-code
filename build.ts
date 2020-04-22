@@ -96,6 +96,7 @@ const adjustPath = (path: opentype.Path, ratio: number, offsetX: number = 0): op
   return adjustedPath;
 };
 
+/** Generate font. It is an entry point of program. */
 const main = async () => {
   console.log('Loading data');
   const asciiSubset = await loadSubsetData(ASCII_SUBSET_DATA_PATH);
@@ -111,11 +112,6 @@ const main = async () => {
   const asciiRatio = (cjkWidth / 2) / asciiWidth;
   const ligatureRatio = (cjkWidth / 2) / ligatureWidth;
 
-  // char -> glyph index
-  const charToGlyphIndex: Map<string, number> = new Map();
-  // ligature name -> glyph index
-  const ligatureToGlyphIndex: Map<string, number> = new Map();
-
   const notdefGlyph = new opentype.Glyph({
     name: '.notdef',
     unicode: 0,
@@ -123,6 +119,11 @@ const main = async () => {
     path: new opentype.Path()
   });
   const glyphs: opentype.Glyph[] = [notdefGlyph];
+
+  // char -> glyph index
+  const charToGlyphIndex: Map<string, number> = new Map();
+  // ligature name -> glyph index
+  const ligatureToGlyphIndex: Map<string, number> = new Map();
 
   console.log('Copying glyphs from ligature font');
   for (const cp of ligatureData.subset) {
@@ -220,7 +221,8 @@ const main = async () => {
   });
 
   // TODO: Use `calt` feature instead of `liga` for more correct substitution.
-  // e.g. `====` is displayed as three-equals plus one equal currently, but four idnependent equals are expected.
+  //       e.g. `====` is displayed as three-equals plus one equal currently,
+  //       but four idnependent equals are expected.
   console.log('Adding ligature information');
   for (const [from, name] of ligatureData.map) {
     font.substitution.add('liga', {

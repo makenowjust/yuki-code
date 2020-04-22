@@ -110,6 +110,7 @@ const main = async () => {
   const cjkWidth = calculateGlyphWidth(cjkFont, 'あ');
   const ligatureWidth = calculateGlyphWidth(ligatureFont, 'a');
   const asciiRatio = (cjkWidth / 2) / asciiWidth;
+  const cjkRatio = 5 /  6; // Other fonts are 5:3 ratio, but CJK fonts are 2:1, so fix is needed.
   const ligatureRatio = (cjkWidth / 2) / ligatureWidth;
 
   const notdefGlyph = new opentype.Glyph({
@@ -177,12 +178,13 @@ const main = async () => {
     }
 
     const glyph = cjkFont.charToGlyph(c);
+    const path = adjustPath(glyph.path, cjkRatio, cjkWidth * ((1 - cjkRatio) / 2));
     charToGlyphIndex.set(c, glyphs.length);
     glyphs.push(new opentype.Glyph({
       name: `c${cp.toString(16).padStart(4, '0')}`,
       unicode: cp,
       advanceWidth: glyph.advanceWidth,
-      path: glyph.path,
+      path,
     }));
   }
 
@@ -214,9 +216,9 @@ const main = async () => {
   const font = new opentype.Font({
     familyName: FONT_FAMILY,
     styleName: FONT_STYLE,
-    unitsPerEm: cjkFont.unitsPerEm,
-    ascender: cjkFont.ascender,
-    descender: cjkFont.descender,
+    unitsPerEm: cjkFont.unitsPerEm * cjkRatio,
+    ascender: cjkFont.ascender * cjkRatio,
+    descender: cjkFont.descender * cjkRatio,
     glyphs,
   });
 

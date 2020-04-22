@@ -3,9 +3,6 @@ import * as path from 'path';
 
 import * as opentype from 'opentype.js';
 
-//
-// settings:
-
 const FONT_FAMILY = 'Yuki Code';
 const FONT_STYLE = 'Regular';
 
@@ -19,9 +16,6 @@ const LIGATURE_FONT_PATH = path.join(RESOURCES_PATH, 'fonts', 'fira-code', 'Fira
 
 const GENERATED_FONT_FILENAME = `${FONT_FAMILY.replace(/ /g, '')}-${FONT_STYLE}.otf`;
 const GENERATED_FONT_PATH = path.join(__dirname, 'output', GENERATED_FONT_FILENAME);
-
-//
-// main:
 
 /** Load subset character data from the given text file. */
 const loadSubsetData = async (path: string): Promise<number[]> => {

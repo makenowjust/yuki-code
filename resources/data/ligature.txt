@@ -5,6 +5,8 @@
 ->  hyphen_greater.liga
 =>  equal_greater.liga
 ::  colon_colon.liga
+;;  semicolon_semicolon.liga
+__  underscore_underscore.liga
 
 # comments:
 /*  slash_asterisk.liga
@@ -27,6 +29,10 @@
 # other operators:
 **  asterisk_asterisk.liga
 //  slash_slash.liga
+<<< less_less_less.liga
+<<  less_less.liga
+>>> greater_greater_greater.liga
+>>  greater_greater.liga
 
 # range constructors:
 ... period_period_period.liga
@@ -34,5 +40,3 @@
 
 # property indicators:
 ?.  question_period.liga
-
-# vim:ft=sh:

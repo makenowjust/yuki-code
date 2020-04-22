@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "sucrase-node build.ts",
-    "lint": "prettier --list-different '**/*.{js,json,ts}'"
+    "lint": "prettier --list-different '**/*.{js,json,ts}'",
+    "type-check": "tsc --noEmit -p ."
   }
 }

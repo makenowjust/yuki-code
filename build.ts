@@ -77,14 +77,16 @@ const loadLigatureData = async (path: string): Promise<LigatureData> => {
 const calculateGlyphWidth = (font: opentype.Font, c: string): number => font.charToGlyph(c).advanceWidth;
 
 /** Adjust the given path by `ratio` and `offsetX`. */
-const adjustPath = (path: opentype.Path, ratio: number, offsetX: number = 0): opentype.Path => {
+const adjustPath = (path: opentype.Path, ratioX: number, ratioY: number = ratioX, offsetX: number = 0): opentype.Path => {
   const adjustedCommands: opentype.PathCommand[] = [];
   for (const command of path.commands) {
     const adjustedCommand: opentype.PathCommand = {type: command.type};
     for (const key of ['x', 'y', 'x1', 'y1', 'x2', 'y2'] as const) {
       const value = command[key];
       if (typeof value === 'number') {
-        adjustedCommand[key] = Math.round(value * ratio) + (key.startsWith('x') ? offsetX : 0);
+        const ratio = key.startsWith('x') ? ratioX : ratioY;
+        const offset = key.startsWith('x') ? offsetX : 0;
+        adjustedCommand[key] = Math.round(value * ratio + offset);
       }
     }
     adjustedCommands.push(adjustedCommand);
@@ -108,14 +110,16 @@ const main = async () => {
   const asciiWidth = calculateGlyphWidth(asciiFont, 'a');
   const cjkWidth = calculateGlyphWidth(cjkFont, 'あ');
   const ligatureWidth = calculateGlyphWidth(ligatureFont, 'a');
-  const asciiRatio = cjkWidth / 2 / asciiWidth;
-  const cjkRatio = 5 / 6; // Other fonts are 5:3 ratio, but CJK fonts are 2:1, so fix is needed.
-  const ligatureRatio = cjkWidth / 2 / ligatureWidth;
+  const asciiRatio = 1.0;
+  const cjkRatio = asciiWidth / (cjkWidth / 2);
+  const ligatureRatio = asciiWidth / ligatureWidth;
+
+  const advanceWidth = asciiWidth;
 
   const notdefGlyph = new opentype.Glyph({
     name: '.notdef',
     unicode: 0,
-    advanceWidth: Math.round(cjkWidth / 2),
+    advanceWidth,
     path: new opentype.Path(),
   });
   const glyphs: opentype.Glyph[] = [notdefGlyph];
@@ -140,7 +144,7 @@ const main = async () => {
       new opentype.Glyph({
         name: `l${cp.toString(16).padStart(4, '0')}`,
         unicode: cp,
-        advanceWidth: glyph.advanceWidth * ligatureRatio,
+        advanceWidth,
         path,
       }),
     );
@@ -166,7 +170,7 @@ const main = async () => {
       new opentype.Glyph({
         name: `a${cp.toString(16).padStart(4, '0')}`,
         unicode: cp,
-        advanceWidth: glyph.advanceWidth * asciiRatio,
+        advanceWidth,
         path,
       }),
     );
@@ -181,13 +185,13 @@ const main = async () => {
     }
 
     const glyph = cjkFont.charToGlyph(c);
-    const path = adjustPath(glyph.path, cjkRatio, cjkWidth * ((1 - cjkRatio) / 2));
+    const path = adjustPath(glyph.path, cjkRatio * 5/6, cjkRatio * 5/6, advanceWidth * (1/12));
     charToGlyphIndex.set(c, glyphs.length);
     glyphs.push(
       new opentype.Glyph({
         name: `c${cp.toString(16).padStart(4, '0')}`,
         unicode: cp,
-        advanceWidth: glyph.advanceWidth,
+        advanceWidth: advanceWidth * 2,
         path,
       }),
     );
@@ -210,13 +214,13 @@ const main = async () => {
     // A ligature glyph has negative offset because FiraCode ligature uses `calt` substitution.
     // In FiraCode, `advanceWidth` is for only last character, other characters are replaced with dummy glyph.
     // So adjusting negative offset and overiding `advanceWidth` are needed.
-    const offsetX = (cjkWidth / 2) * (from.length - 1);
-    const path = adjustPath(glyph.path, ligatureRatio, offsetX);
+    const offsetX = advanceWidth * (from.length - 1);
+    const path = adjustPath(glyph.path, ligatureRatio, ligatureRatio, offsetX);
     ligatureToGlyphIndex.set(name, glyphs.length);
     glyphs.push(
       new opentype.Glyph({
         name,
-        advanceWidth: (cjkWidth / 2) * from.length,
+        advanceWidth: advanceWidth * from.length,
         path,
       }),
     );
@@ -225,9 +229,9 @@ const main = async () => {
   const font = new opentype.Font({
     familyName: FONT_FAMILY,
     styleName: FONT_STYLE,
-    unitsPerEm: cjkFont.unitsPerEm * cjkRatio,
-    ascender: cjkFont.ascender * cjkRatio,
-    descender: cjkFont.descender * cjkRatio,
+    unitsPerEm: asciiFont.unitsPerEm,
+    ascender: asciiFont.ascender,
+    descender: asciiFont.descender,
     glyphs,
   });
 

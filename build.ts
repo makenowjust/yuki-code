@@ -60,7 +60,9 @@ const loadLigatureData = async (path: string): Promise<LigatureData> => {
     }
 
     const [from, to] = line.split(/\s+/, 2);
-    map.set(from, to);
+    if (to) {
+      map.set(from, to);
+    }
 
     for (const char of from) {
       set.add(char.codePointAt(0)!);

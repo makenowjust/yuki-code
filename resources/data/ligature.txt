@@ -1,3 +1,6 @@
+# backslash is copied from ligature font due to symmetry to slash.
+\
+
 # punctuations:
 ->  hyphen_greater.liga
 =>  equal_greater.liga

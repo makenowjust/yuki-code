@@ -70,12 +70,11 @@ const loadLigatureData = async (path: string): Promise<LigatureData> => {
   }
 
   const subset = Array.from(set).sort((a, b) => a - b);
-  return { set, subset, map };
+  return {set, subset, map};
 };
 
 /** Calculate the given character's glyph width in the given font. */
-const calculateGlyphWidth = (font: opentype.Font, c: string): number =>
-  font.charToGlyph(c).advanceWidth;
+const calculateGlyphWidth = (font: opentype.Font, c: string): number => font.charToGlyph(c).advanceWidth;
 
 /** Adjust the given path by `ratio` and `offsetX`. */
 const adjustPath = (path: opentype.Path, ratio: number, offsetX: number = 0): opentype.Path => {
@@ -109,15 +108,15 @@ const main = async () => {
   const asciiWidth = calculateGlyphWidth(asciiFont, 'a');
   const cjkWidth = calculateGlyphWidth(cjkFont, 'あ');
   const ligatureWidth = calculateGlyphWidth(ligatureFont, 'a');
-  const asciiRatio = (cjkWidth / 2) / asciiWidth;
-  const cjkRatio = 5 /  6; // Other fonts are 5:3 ratio, but CJK fonts are 2:1, so fix is needed.
-  const ligatureRatio = (cjkWidth / 2) / ligatureWidth;
+  const asciiRatio = cjkWidth / 2 / asciiWidth;
+  const cjkRatio = 5 / 6; // Other fonts are 5:3 ratio, but CJK fonts are 2:1, so fix is needed.
+  const ligatureRatio = cjkWidth / 2 / ligatureWidth;
 
   const notdefGlyph = new opentype.Glyph({
     name: '.notdef',
     unicode: 0,
     advanceWidth: Math.round(cjkWidth / 2),
-    path: new opentype.Path()
+    path: new opentype.Path(),
   });
   const glyphs: opentype.Glyph[] = [notdefGlyph];
 
@@ -137,12 +136,14 @@ const main = async () => {
     const glyph = ligatureFont.charToGlyph(c);
     const path = adjustPath(glyph.path, ligatureRatio);
     charToGlyphIndex.set(c, glyphs.length);
-    glyphs.push(new opentype.Glyph({
-      name: `l${cp.toString(16).padStart(4, '0')}`,
-      unicode: cp,
-      advanceWidth: glyph.advanceWidth * ligatureRatio,
-      path,
-    }));
+    glyphs.push(
+      new opentype.Glyph({
+        name: `l${cp.toString(16).padStart(4, '0')}`,
+        unicode: cp,
+        advanceWidth: glyph.advanceWidth * ligatureRatio,
+        path,
+      }),
+    );
   }
 
   console.log('Copying glyphs from ASCII font');
@@ -161,12 +162,14 @@ const main = async () => {
     const glyph = asciiFont.charToGlyph(c);
     const path = adjustPath(glyph.path, asciiRatio);
     charToGlyphIndex.set(c, glyphs.length);
-    glyphs.push(new opentype.Glyph({
-      name: `a${cp.toString(16).padStart(4, '0')}`,
-      unicode: cp,
-      advanceWidth: glyph.advanceWidth * asciiRatio,
-      path,
-    }));
+    glyphs.push(
+      new opentype.Glyph({
+        name: `a${cp.toString(16).padStart(4, '0')}`,
+        unicode: cp,
+        advanceWidth: glyph.advanceWidth * asciiRatio,
+        path,
+      }),
+    );
   }
 
   console.log('Copying glyphs from CJK font');
@@ -180,12 +183,14 @@ const main = async () => {
     const glyph = cjkFont.charToGlyph(c);
     const path = adjustPath(glyph.path, cjkRatio, cjkWidth * ((1 - cjkRatio) / 2));
     charToGlyphIndex.set(c, glyphs.length);
-    glyphs.push(new opentype.Glyph({
-      name: `c${cp.toString(16).padStart(4, '0')}`,
-      unicode: cp,
-      advanceWidth: glyph.advanceWidth,
-      path,
-    }));
+    glyphs.push(
+      new opentype.Glyph({
+        name: `c${cp.toString(16).padStart(4, '0')}`,
+        unicode: cp,
+        advanceWidth: glyph.advanceWidth,
+        path,
+      }),
+    );
   }
 
   console.log('Copying ligature glyphs');
@@ -208,11 +213,13 @@ const main = async () => {
     const offsetX = (cjkWidth / 2) * (from.length - 1);
     const path = adjustPath(glyph.path, ligatureRatio, offsetX);
     ligatureToGlyphIndex.set(name, glyphs.length);
-    glyphs.push(new opentype.Glyph({
-      name,
-      advanceWidth: (cjkWidth / 2) * from.length,
-      path,
-    }));
+    glyphs.push(
+      new opentype.Glyph({
+        name,
+        advanceWidth: (cjkWidth / 2) * from.length,
+        path,
+      }),
+    );
   }
 
   const font = new opentype.Font({

@@ -21,7 +21,7 @@ So, this font inherits three fonts features like that:
   - 🈴 Ligatures Support (e.g. `==`, `!=`, `<=>` and more)
 
 **NOTE**: To reduce building time and file size,
-          this font imports only Hiragana/Katakana/Joyo Kanji and some full-width symbols from Source Han Code JP.
+          this font imports only Hiragana/Katakana/Joyo Kanji/Jinmeiyou Kanji and some full-width symbols from Source Han Code JP.
           See [full list of including characters](resources/data/cjk.txt).
 
 ## Development

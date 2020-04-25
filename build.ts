@@ -7,7 +7,6 @@ const FONT_FAMILY = 'Yuki Code';
 const FONT_STYLE = 'Regular';
 
 const RESOURCES_PATH = path.join(__dirname, 'resources');
-const OUTPUT_PATH = path.join(__dirname, 'output');
 const ASCII_SUBSET_DATA_PATH = path.join(RESOURCES_PATH, 'data', 'ascii.txt');
 const CJK_SUBSET_DATA_PATH = path.join(RESOURCES_PATH, 'data', 'cjk.txt');
 const LIGATURE_DATA_PATH = path.join(RESOURCES_PATH, 'data', 'ligature.txt');
@@ -245,11 +244,6 @@ const main = async () => {
       sub: Array.from(from).map(c => charToGlyphIndex.get(c)!),
       by: ligatureToGlyphIndex.get(name)!,
     });
-  }
-
-  if (!fs.existsSync(OUTPUT_PATH)) {
-    console.log('Creating output folder');
-    fs.mkdirSync(OUTPUT_PATH);
   }
 
   console.log('Generating a font');

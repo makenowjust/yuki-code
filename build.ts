@@ -7,10 +7,10 @@ const FONT_FAMILY = 'Yuki Code';
 const FONT_STYLE = 'Regular';
 
 const RESOURCES_PATH = path.join(__dirname, 'resources');
-const ASCII_SUBSET_DATA_PATH = path.join(RESOURCES_PATH, 'data', 'ascii.txt');
+const LATIN_SUBSET_DATA_PATH = path.join(RESOURCES_PATH, 'data', 'latin.txt');
 const CJK_SUBSET_DATA_PATH = path.join(RESOURCES_PATH, 'data', 'cjk.txt');
 const LIGATURE_DATA_PATH = path.join(RESOURCES_PATH, 'data', 'ligature.txt');
-const ASCII_FONT_PATH = path.join(RESOURCES_PATH, 'fonts', 'nova-mono', 'NovaMono-Regular.ttf');
+const LATIN_FONT_PATH = path.join(RESOURCES_PATH, 'fonts', 'nova-mono', 'NovaMono-Regular.ttf');
 const CJK_FONT_PATH = path.join(RESOURCES_PATH, 'fonts', 'source-han-code-jp', 'SourceHanCodeJP-Regular.otf');
 const LIGATURE_FONT_PATH = path.join(RESOURCES_PATH, 'fonts', 'fira-code', 'FiraCode-Regular.otf');
 
@@ -77,7 +77,12 @@ const loadLigatureData = async (path: string): Promise<LigatureData> => {
 const calculateGlyphWidth = (font: opentype.Font, c: string): number => font.charToGlyph(c).advanceWidth;
 
 /** Adjust the given path by `ratio` and `offsetX`. */
-const adjustPath = (path: opentype.Path, ratioX: number, ratioY: number = ratioX, offsetX: number = 0): opentype.Path => {
+const adjustPath = (
+  path: opentype.Path,
+  ratioX: number,
+  ratioY: number = ratioX,
+  offsetX: number = 0,
+): opentype.Path => {
   const adjustedCommands: opentype.PathCommand[] = [];
   for (const command of path.commands) {
     const adjustedCommand: opentype.PathCommand = {type: command.type};
@@ -100,21 +105,21 @@ const adjustPath = (path: opentype.Path, ratioX: number, ratioY: number = ratioX
 /** Generate font. It is an entry point of program. */
 const main = async () => {
   console.log('Loading data');
-  const asciiSubset = await loadSubsetData(ASCII_SUBSET_DATA_PATH);
+  const latinSubset = await loadSubsetData(LATIN_SUBSET_DATA_PATH);
   const cjkSubset = await loadSubsetData(CJK_SUBSET_DATA_PATH);
   const ligatureData = await loadLigatureData(LIGATURE_DATA_PATH);
-  const asciiFont = await opentype.load(ASCII_FONT_PATH);
+  const latinFont = await opentype.load(LATIN_FONT_PATH);
   const cjkFont = await opentype.load(CJK_FONT_PATH);
   const ligatureFont = await opentype.load(LIGATURE_FONT_PATH);
 
-  const asciiWidth = calculateGlyphWidth(asciiFont, 'a');
+  const latinWidth = calculateGlyphWidth(latinFont, 'a');
   const cjkWidth = calculateGlyphWidth(cjkFont, 'あ');
   const ligatureWidth = calculateGlyphWidth(ligatureFont, 'a');
-  const asciiRatio = 1.0;
-  const cjkRatio = asciiWidth / (cjkWidth / 2);
-  const ligatureRatio = asciiWidth / ligatureWidth;
+  const latinRatio = 1.0;
+  const cjkRatio = latinWidth / (cjkWidth / 2);
+  const ligatureRatio = latinWidth / ligatureWidth;
 
-  const advanceWidth = asciiWidth;
+  const advanceWidth = latinWidth;
 
   const notdefGlyph = new opentype.Glyph({
     name: '.notdef',
@@ -150,21 +155,21 @@ const main = async () => {
     );
   }
 
-  console.log('Copying glyphs from ASCII font');
-  for (const cp of asciiSubset) {
+  console.log('Copying glyphs from latin font');
+  for (const cp of latinSubset) {
     // Skip a char copied from ligature font before.
     if (ligatureData.set.has(cp)) {
       continue;
     }
 
     const c = String.fromCodePoint(cp);
-    if (!asciiFont.hasChar(c)) {
-      console.log(`WARN: missing glyph in ASCII font: ${c} (U+${cp.toString(16)})`);
+    if (!latinFont.hasChar(c)) {
+      console.log(`WARN: missing glyph in latin font: ${c} (U+${cp.toString(16)})`);
       continue;
     }
 
-    const glyph = asciiFont.charToGlyph(c);
-    const path = adjustPath(glyph.path, asciiRatio);
+    const glyph = latinFont.charToGlyph(c);
+    const path = adjustPath(glyph.path, latinRatio);
     charToGlyphIndex.set(c, glyphs.length);
     glyphs.push(
       new opentype.Glyph({
@@ -185,7 +190,7 @@ const main = async () => {
     }
 
     const glyph = cjkFont.charToGlyph(c);
-    const path = adjustPath(glyph.path, cjkRatio * 5/6, cjkRatio * 5/6, advanceWidth * (1/12));
+    const path = adjustPath(glyph.path, (cjkRatio * 5) / 6, (cjkRatio * 5) / 6, advanceWidth * (1 / 12));
     charToGlyphIndex.set(c, glyphs.length);
     glyphs.push(
       new opentype.Glyph({
@@ -229,9 +234,9 @@ const main = async () => {
   const font = new opentype.Font({
     familyName: FONT_FAMILY,
     styleName: FONT_STYLE,
-    unitsPerEm: asciiFont.unitsPerEm,
-    ascender: asciiFont.ascender,
-    descender: asciiFont.descender,
+    unitsPerEm: latinFont.unitsPerEm,
+    ascender: latinFont.ascender,
+    descender: latinFont.descender,
     glyphs,
   });
 
